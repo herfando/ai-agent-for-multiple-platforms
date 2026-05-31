@@ -4,4 +4,12 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-    return {"message": "Hello World"}
+    return {
+        "message": "AI Agent API Running"
+    }
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok"
+    }
