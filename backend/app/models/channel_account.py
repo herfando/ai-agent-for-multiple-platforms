@@ -2,14 +2,15 @@ from sqlalchemy import Column, String, DateTime
 from datetime import datetime
 from app.models.base import Base
 
-class TenantUser(Base):
-    __tablename__ = "tenant_users"
+class ChannelAccount(Base):
+    __tablename__ = "channel_accounts"
 
     id = Column(String, primary_key=True)
 
     tenant_id = Column(String, index=True)
-    user_id = Column(String, index=True)
+    channel_id = Column(String, index=True)
 
-    role = Column(String)
+    account_identifier = Column(String)  # IG username / WA number
+    access_token = Column(String)
 
     created_at = Column(DateTime, default=datetime.utcnow)
