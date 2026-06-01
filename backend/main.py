@@ -1,15 +1,13 @@
 from fastapi import FastAPI
-from app.db.database import Base, engine
 
-from app.models.user import User
-from app.models.tenant import Tenant
-from app.models.tenant_user import TenantUser
+from app.api.auth import router as auth_router
 
 app = FastAPI()
 
-# create tables (sementara untuk dev)
-Base.metadata.create_all(bind=engine)
+# ROUTES
+app.include_router(auth_router, prefix="/auth")
 
+# ROOT
 @app.get("/")
 def root():
     return {"message": "AI Agent API Running"}
