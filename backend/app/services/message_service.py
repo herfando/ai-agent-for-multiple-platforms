@@ -1,6 +1,7 @@
 import uuid
 
 from app.models.message import Message
+from app.services.queue_service import push_ai_job
 
 def save_message(db, conversation_id, content, role):
 
@@ -14,5 +15,12 @@ def save_message(db, conversation_id, content, role):
     db.add(message)
     db.commit()
     db.refresh(message)
+
+    # Push the message to the AI job queue
+    push_ai_job({
+    "conversation_id": conversation_id,
+    "message_id": message.id,
+    "content": content
+})
 
     return message
