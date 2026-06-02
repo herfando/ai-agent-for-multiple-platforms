@@ -1,6 +1,6 @@
 # Project Notes
 
-## Start
+## Start Backend
 
 1. Activate venv
    source venv/Scripts/activate
@@ -11,7 +11,11 @@
 3. Run backend
    uvicorn main:app --reload
 
-## Stop
+4. Swagger
+
+http://localhost:8000/docs
+
+## Stop Backend
 
 1. Stop backend
    Ctrl + C

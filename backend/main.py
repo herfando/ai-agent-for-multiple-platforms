@@ -2,6 +2,11 @@ from fastapi import FastAPI
 
 from app.api.auth import router as auth_router
 from app.api.messages import router as message_router
+from app.api.conversations import (
+    router as conversation_router
+)
+
+
 
 app = FastAPI()
 
@@ -12,6 +17,11 @@ app.include_router(
     message_router,
     prefix="/messages",
     tags=["Messages"]
+)
+app.include_router(
+    conversation_router,
+    prefix="/conversations",
+    tags=["Conversations"]
 )
 
 # ROOT
