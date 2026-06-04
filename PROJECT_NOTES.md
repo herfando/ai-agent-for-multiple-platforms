@@ -2,18 +2,24 @@
 
 ## Start Backend
 
-1. Activate venv
+1. Activate virtual environment
    source venv/Scripts/activate
 
-2. Start Docker
+2. Start Docker (Redis, DB, dll)
    docker compose up -d
 
-3. Run backend
+3. Run backend (FastAPI server)
    uvicorn main:app --reload
 
-4. Swagger
+4. Run AI Worker (BACKGROUND PROCESS)
+   python worker.py
+
+5. Swagger API Docs
 
 http://localhost:8000/docs
+
+6. Update requirements.txt
+   pip freeze > requirements.txt
 
 ## Stop Backend
 
