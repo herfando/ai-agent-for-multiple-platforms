@@ -2,9 +2,15 @@ import json
 import time
 
 from app.core.redis import redis_client
-from app.services.ai_service import generate_ai_reply
 from app.db.database import SessionLocal
-from app.services.conversation_state_service import get_or_create_state
+
+from app.services.ai_service import generate_ai_reply
+from app.services.intent_service import detect_intent
+from app.services.conversation_state_service import (
+    get_or_create_state,
+    update_state
+)
+
 from app.models.ai import AIMemory
 
 
@@ -12,6 +18,7 @@ QUEUE_NAME = "ai_jobs"
 
 
 def process_job(job):
+
     db = SessionLocal()
 
     try:
@@ -20,29 +27,36 @@ def process_job(job):
         conversation_id = job["conversation_id"]
         content = job["content"]
 
-        # ambil / buat state conversation
+        # 🔥 1. GET OR CREATE STATE
         state = get_or_create_state(db, conversation_id)
 
-        # ambil memory AI kalau ada
+        # 🔥 2. DETECT INTENT
+        intent = detect_intent(content)
+
+        # 🔥 3. UPDATE STATE (funnel + tracking)
+        update_state(db, state, content, intent)
+
+        # 🔥 4. GET MEMORY
         memory = db.query(AIMemory).filter(
             AIMemory.contact_id == conversation_id
         ).first()
 
         memory_text = memory.memory if memory else ""
 
-        # panggil AI (Groq via service layer)
+        # 🔥 5. GENERATE AI RESPONSE
         ai_reply = generate_ai_reply(
             content,
             state,
             memory_text
         )
 
+        print("INTENT:", intent)
         print("AI REPLY:", ai_reply)
 
-        # TODO (fase berikutnya):
-        # - save message ke DB
+        # TODO NEXT:
+        # - save message to DB
         # - update memory
-        # - kirim ke WhatsApp / Instagram
+        # - send to WhatsApp / Instagram
 
     except Exception as e:
         print("Error processing job:", str(e))
