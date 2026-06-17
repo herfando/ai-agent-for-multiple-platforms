@@ -11,8 +11,10 @@ from app.services.conversation_state_service import (
     update_state
 )
 
-from app.models.ai import AIMemory
+from app.services.response_service import build_response
+from app.services.response_router import route_response
 
+from app.models.ai import AIMemory
 
 QUEUE_NAME = "ai_jobs"
 
@@ -27,36 +29,41 @@ def process_job(job):
         conversation_id = job["conversation_id"]
         content = job["content"]
 
-        # 🔥 1. GET OR CREATE STATE
+        # 🔵 1. STATE
         state = get_or_create_state(db, conversation_id)
 
-        # 🔥 2. DETECT INTENT
+        # 🔵 2. INTENT DETECTION
         intent = detect_intent(content)
 
-        # 🔥 3. UPDATE STATE (funnel + tracking)
+        # 🔵 3. UPDATE STATE
         update_state(db, state, content, intent)
 
-        # 🔥 4. GET MEMORY
+        # 🔵 4. MEMORY LOAD
         memory = db.query(AIMemory).filter(
             AIMemory.contact_id == conversation_id
         ).first()
 
         memory_text = memory.memory if memory else ""
 
-        # 🔥 5. GENERATE AI RESPONSE
+        # 🔵 5. AI GENERATION (GROQ)
         ai_reply = generate_ai_reply(
             content,
             state,
             memory_text
         )
 
+        # 🔵 6. BUILD RESPONSE OBJECT
+        response = build_response(ai_reply)
+
+        # 🔵 7. ROUTE KE PLATFORM
+        route_response(
+            "instagram",
+            response,
+            conversation_id
+        )
+
         print("INTENT:", intent)
         print("AI REPLY:", ai_reply)
-
-        # TODO NEXT:
-        # - save message to DB
-        # - update memory
-        # - send to WhatsApp / Instagram
 
     except Exception as e:
         print("Error processing job:", str(e))
